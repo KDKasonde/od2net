@@ -133,6 +133,7 @@ pub struct Edge {
     // TODO Maybe generalize as a cost and a bunch of properties per edge -- like proximity
     // modifiers for greenspace, lighting, commercial areas
     pub nearby_amenities: usize,
+    pub next_to_motorway: bool,
 }
 
 impl Edge {
