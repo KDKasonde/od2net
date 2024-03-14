@@ -81,6 +81,14 @@ impl Network {
         }
         timer.stop();
 
+        timer.start("Checking for nearby motorways");
+        let progress = utils::progress_bar_for_count(network.edges.len());
+
+        let all_keys: Vec<(NodeID, NodeID)> = network.edges.keys().cloned().collect();
+        for (_, edge) in &network.edges {
+            
+        }
+
         if let Some(bytes) = geotiff_bytes {
             timer.start("Calculate elevation for all edges");
             let mut geotiff = GeoTiffElevation::new(Cursor::new(bytes));
@@ -212,6 +220,11 @@ fn split_edges(nodes: HashMap<NodeID, Position>, ways: HashMap<WayID, Way>) -> N
     for (way_id, way) in ways {
         let mut node1 = way.nodes[0];
         let mut pts = Vec::new();
+        let is_edge_motorway = if way.tags.get("highway") == Some(&"primary".to_string()) {
+            true 
+        } else {
+            false 
+        };
 
         let num_nodes = way.nodes.len();
         for (idx, node) in way.nodes.into_iter().enumerate() {
@@ -238,6 +251,8 @@ fn split_edges(nodes: HashMap<NodeID, Position>, ways: HashMap<WayID, Way>) -> N
                         slope_factor: None,
                         lts: LTS::NotAllowed,
                         nearby_amenities: 0,
+                        next_to_motorway: false,
+                        is_motorway: is_edge_motorway 
                     },
                 );
 
