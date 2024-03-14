@@ -12,7 +12,7 @@ use elevation::GeoTiffElevation;
 use fs_err::File;
 use osm_reader::{NodeID, WayID};
 use serde::{Deserialize, Serialize};
-use geo::LineString;
+use geo::{LineString, Polygon};
 
 use lts::{Tags, LTS};
 
@@ -162,6 +162,22 @@ impl Edge {
         let line_string =
             LineString::<f64>::from(pts.iter().map(|pt| pt.to_degrees()).collect::<Vec<_>>());
         line_string
+    }
+    
+    /// This is taken from
+    /// https://github.com/dabreegster/spatial_join_tests/blob/f05062331886fc4a358e7af5629477d36cdecc17/rust/src/geo_utils.rs#L54
+    pub fn get_buffer_line_string(&self, left_meters: f64, right_meters: f64) -> Option<Polygon> {
+        assert!(left_meters >= 0.0);
+        assert!(right_meters >= 0.0);
+
+        let line_string = self.get_line_string();
+        let left = line_string.offset_curve(-left_meters)?;
+        let right = line_string.offset_curve(right_meters)?;
+
+        let mut pts = left.0;
+        pts.reverse();
+        pts.extend(right.0);
+        Some(Polygon::new(LineString(pts), Vec::new()))
     }
 
     fn get_slope<R: Read + Seek + Send>(&self, geotiff: &mut GeoTiffElevation<R>) -> Option<f64> {
