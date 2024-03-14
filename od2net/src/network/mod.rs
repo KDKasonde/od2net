@@ -12,6 +12,7 @@ use elevation::GeoTiffElevation;
 use fs_err::File;
 use osm_reader::{NodeID, WayID};
 use serde::{Deserialize, Serialize};
+use geo::LineString;
 
 use lts::{Tags, LTS};
 
@@ -154,6 +155,13 @@ impl Edge {
             calculate_slope_factor(-slope, self.length_meters),
         ));
         true
+    }
+
+    pub fn get_line_string(&self) -> LineString {
+        let pts = &self.geometry;
+        let line_string =
+            LineString::<f64>::from(pts.iter().map(|pt| pt.to_degrees()).collect::<Vec<_>>());
+        line_string
     }
 
     fn get_slope<R: Read + Seek + Send>(&self, geotiff: &mut GeoTiffElevation<R>) -> Option<f64> {
