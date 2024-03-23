@@ -385,9 +385,8 @@ dependencies = [
 
 [[package]]
 name = "geo"
-version = "0.28.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f811f663912a69249fa620dcd2a005db7254529da2d8a0b23942e81f47084501"
+version = "0.27.0"
+source = "git+https://github.com/dabreegster/geo?branch=boolops_and_linesplit#31a886b0fd7bae7abb0f3abd5870350a22f821db"
 dependencies = [
  "earcutr",
  "float_next_after",

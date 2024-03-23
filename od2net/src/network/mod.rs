@@ -2,6 +2,7 @@ mod amenities;
 mod create_from_osm;
 mod greenspace;
 mod output;
+mod highways;
 
 use std::collections::HashMap;
 use std::io::BufReader;
@@ -12,7 +13,7 @@ use elevation::GeoTiffElevation;
 use fs_err::File;
 use osm_reader::{NodeID, WayID};
 use serde::{Deserialize, Serialize};
-use geo::{LineString, Polygon};
+use geo::{LineString, Polygon, OffsetCurve};
 
 use lts::{Tags, LTS};
 
