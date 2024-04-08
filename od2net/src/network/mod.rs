@@ -181,6 +181,10 @@ impl Edge {
         Some(Polygon::new(LineString(pts), Vec::new()))
     }
 
+    pub fn set_next_to_motorway_flag(&mut self, flag: bool) {
+        self.next_to_motorway = flag;
+    }
+
     fn get_slope<R: Read + Seek + Send>(&self, geotiff: &mut GeoTiffElevation<R>) -> Option<f64> {
         let (lon1, lat1) = self.geometry[0].to_degrees();
         let (lon2, lat2) = self.geometry.last().unwrap().to_degrees();

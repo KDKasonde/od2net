@@ -3,7 +3,7 @@ use std::{collections::HashMap, io::Cursor};
 use anyhow::Result;
 use elevation::GeoTiffElevation;
 use geo::prelude::HaversineLength;
-use geo::{LineString, Polygon};
+use geo::{Intersects, LineString, Polygon};
 use indicatif::HumanCount;
 use osm_reader::{Element, NodeID, WayID};
 use rstar::primitives::{GeomWithData, Line};
@@ -11,6 +11,7 @@ use rstar::RTree;
 
 use super::amenities::is_amenity;
 use super::greenspace;
+use super::highways::is_highway;
 use super::{Edge, Network, Position};
 use crate::config::{CostFunction, LtsMapping};
 use crate::timer::Timer;
@@ -84,10 +85,29 @@ impl Network {
         timer.start("Checking for nearby motorways");
         let progress = utils::progress_bar_for_count(network.edges.len());
 
-        let all_keys: Vec<(NodeID, NodeID)> = network.edges.keys().cloned().collect();
-        for (_, edge) in &network.edges {
-            
+        let mut motorway_edges = Vec::new();
+        let mut non_motorway_edges = Vec::new();
+        for (_, edge) in &mut network.edges {
+             if edge.is_motorway {
+                 if let Some(poly) = edge.get_buffer_line_string(5.0, 5.0) {
+                    motorway_edges.push(poly);
+                 };
+             } else {
+                non_motorway_edges.push(edge);
+             }
         }
+
+        for edge in &mut non_motorway_edges {
+            for poly in &motorway_edges {
+                let line_string = edge.get_line_string();
+                if poly.intersects(&line_string) {
+                    edge.set_next_to_motorway_flag(true);
+                    break;
+                }
+            }
+        }
+
+
 
         if let Some(bytes) = geotiff_bytes {
             timer.start("Calculate elevation for all edges");
@@ -220,11 +240,7 @@ fn split_edges(nodes: HashMap<NodeID, Position>, ways: HashMap<WayID, Way>) -> N
     for (way_id, way) in ways {
         let mut node1 = way.nodes[0];
         let mut pts = Vec::new();
-        let is_edge_motorway = if way.tags.get("highway") == Some(&"primary".to_string()) {
-            true 
-        } else {
-            false 
-        };
+        let is_edge_motorway = is_highway(way.tags.clone());
 
         let num_nodes = way.nodes.len();
         for (idx, node) in way.nodes.into_iter().enumerate() {
@@ -293,4 +309,5 @@ fn build_closest_edge(network: &Network, timer: &mut Timer) -> RTree<EdgeLocatio
     let rtree = RTree::bulk_load(lines);
     timer.stop();
     rtree
-}
+} 
+

@@ -79,7 +79,9 @@ impl MaxSpeed {
             }
         )
     }
-
+    
+    // these may end up being removed I just thought
+    // having them is better than not.
     fn convert_to_mi(&mut self) -> Result<(),()>{
         match self.speed_measure {
             SpeedMeasure::KPH => {
@@ -126,6 +128,7 @@ impl MaxSpeed {
 // so far this only catches maxspeeds which have the type
 // numeric speed limit. Converting to miles so far since UK uses miles
 // however maybe this should be a user config?
+// any errors will resolve as false.
 pub fn is_highway(tags: Tags) -> bool {
     if tags.is_any("highway",vec![ "primary","motorway"]) {
         return true
@@ -150,7 +153,9 @@ pub fn is_highway(tags: Tags) -> bool {
     if !max_speed.convert_to_mi().is_ok() {
         return false 
     }
-
+    
+    // I chose 50 mph because I am more aware of mph speeds
+    //  maybe this should be a user preference if thats possible?
     if max_speed.speed >= 50. {
         return true 
     }        
