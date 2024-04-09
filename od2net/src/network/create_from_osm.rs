@@ -82,12 +82,16 @@ impl Network {
         }
         timer.stop();
 
+        // The next two chunks first pull all motorway edges then,
+        // check non motorway edges that are within 5 meters and labels them
+        // as next to motorway.
         timer.start("Checking for nearby motorways");
         let progress = utils::progress_bar_for_count(network.edges.len());
 
         let mut motorway_edges = Vec::new();
         let mut non_motorway_edges = Vec::new();
         for (_, edge) in &mut network.edges {
+            progress.inc(1);
              if edge.is_motorway {
                  if let Some(poly) = edge.get_buffer_line_string(5.0, 5.0) {
                     motorway_edges.push(poly);
@@ -96,8 +100,13 @@ impl Network {
                 non_motorway_edges.push(edge);
              }
         }
+        timer.stop();
+
+        timer.start("Checking for bike lanes near motorways");
+        let progress = utils::progress_bar_for_count(non_motorway_edges.len());
 
         for edge in &mut non_motorway_edges {
+            progress.inc(1);
             for poly in &motorway_edges {
                 let line_string = edge.get_line_string();
                 if poly.intersects(&line_string) {
