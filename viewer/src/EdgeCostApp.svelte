@@ -21,6 +21,8 @@
     colorScale,
     ltsNames,
     makeColorRamp,
+    colorByMotorway,
+    motorwayProximityNames
     type Cost,
   } from "./common";
   import CostFunction from "./CostFunction.svelte";
@@ -38,7 +40,7 @@
     await initLts();
   });
 
-  type ColorBy = "lts" | "cost" | "nearby_amenities";
+  type ColorBy = "lts" | "cost" | "nearby_amenities" | "motorway_proximity";
 
   let map: MapType;
   let network: JsNetwork | undefined;
@@ -129,6 +131,8 @@
   ): DataDrivenPropertyValueSpecification<string> {
     if (colorBy == "lts") {
       return colorByLts;
+    } else if (colorBy == "motorway_proximity") {
+        return colorByMotorway;
     } else if (colorBy == "cost") {
       return [
         "case",
@@ -171,7 +175,7 @@
     maxCostRatio: number,
     maxNearbyAmenities: number,
   ): number[] {
-    if (colorBy == "lts") {
+    if (colorBy == "lts" || colorBy == "motorway_proximity") {
       return [];
     } else if (colorBy == "cost") {
       return equalBins(0.0, maxCostRatio);
@@ -249,15 +253,15 @@
               colors.lts1,
             ],
             [
-              `${ltsNames.lts2}: ${percentByLength[2].toFixed(0)}%`,
+              `${ltsNames.lts2}: ${percentByLength[2].toFixed(0)}% of roads by distance`,
               colors.lts2,
             ],
             [
-              `${ltsNames.lts3}: ${percentByLength[3].toFixed(0)}%`,
+              `${ltsNames.lts3}: ${percentByLength[3].toFixed(0)}% of roads by distance`,
               colors.lts3,
             ],
             [
-              `${ltsNames.lts4}: ${percentByLength[4].toFixed(0)}%`,
+              `${ltsNames.lts4}: ${percentByLength[4].toFixed(0)}% of roads by distance`,
               colors.lts4,
             ],
           ]}
@@ -269,6 +273,33 @@
           >
             BikeOttawa
           </a>
+        </p>
+      {:else if colorBy == "motorway_proximity"}
+        <Legend
+          rows={[
+            [
+              `${motorwayProximityNames.clear}: ${percentByLength[1].toFixed(
+                0,
+              )}% of roads by distance`,
+              colors.clear,
+            ],
+            [
+              `${motorwayProximityNames.nextToMotorway}: ${percentByLength[2].toFixed(0)}% of roads by distance`,
+              colors.nextToMotorway,
+            ],
+            [
+              `${motorwayProximityNames.motorway}: ${percentByLength[3].toFixed(0)}% of roads by distance`,
+              colors.motorway,
+            ],
+          ]}
+        />
+        <p>
+          Note: Motorways determined via <a
+            href="https://wiki.openstreetmap.org/wiki/Tag:highway%3Dmotorway"
+            target="_blank"
+          >
+            OSM highway tags
+          </a> or if the speed limit is 50 miles per hour. The cut off point for being next to a motorway is 5 metres.
         </p>
       {:else}
         <SequentialLegend

@@ -114,7 +114,7 @@ export let slopeColors = [
 // which are far away from motorways using red, amber, green coloring
 export let colorByMotorway: ExpressionSpecification = [
     "match",
-    ["get", "motorways"],
+    ["get", "motorway_proximity"],
     0,
     colors.clear,
     1,
