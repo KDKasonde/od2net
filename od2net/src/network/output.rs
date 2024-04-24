@@ -80,7 +80,14 @@ impl Edge {
             feature.set_property("slope", slope);
         };
         feature.set_property("lts", serde_json::to_value(self.lts).unwrap());
-        feature.set_property("nearby_amenities", self.nearby_amenities);
+        let motorway_proximity = if self.is_motorway {
+            2
+        } else if self.next_to_motorway {
+            1
+        } else {
+            0
+        };
+        feature.set_property("motorway_proximity", motorway_proximity);
         feature
     }
 }

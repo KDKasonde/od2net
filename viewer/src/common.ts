@@ -46,6 +46,11 @@ export let colors = {
   lts3: "#e69f00",
   lts4: "#d55e00",
   lts_not_allowed: "red",
+
+  // Red, Amber, Green for motorway proximity
+  motorway: "#d2222d",
+  nextToMotorway: "#ffbf00",
+  clear: "#238823",
 };
 
 export let colorByLts: ExpressionSpecification = [
@@ -104,3 +109,22 @@ export let slopeColors = [
   "#A80000",
   "#730000",
 ];
+
+// Colors to represent motorwqys, road close to motorways and roads 
+// which are far away from motorways using red, amber, green coloring
+export let colorByMotorway: ExpressionSpecification = [
+    "match",
+    ["get", "motorways"],
+    0,
+    colors.clear,
+    1,
+    colors.nextToMotorway,
+    2,
+    colors.motorway
+];
+
+export let motorwayProximityNames = {
+    clear: "No motorways near this route",
+    nextToMotorway: "Motorway is close to this route",
+    motorway: "This route is a motorway"
+};
